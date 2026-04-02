@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Cinzel:wght@400;700;900&family=Uncial+Antiqua&family=Inter:wght@400;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  @keyframes shine {
+    from { left: -150%; }
+    to { left: 150%; }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  background-color: #020617;
+}
+
+canvas {
+  display: block;
+}
+
+.game-bg {
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+}
+
+@layer utilities {
+  .animate-shine {
+    animation: shine 2s infinite;
+  }
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .card-container {
+    scale: 0.8;
+  }
+}
