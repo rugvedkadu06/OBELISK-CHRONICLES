@@ -7,16 +7,16 @@ export default function Hand() {
   const { hand, playCard, playerEnergy, turn, isAnimating, gameResult } = useGameStore();
 
   return (
-    <div className="absolute bottom-4 left-0 w-full px-4 overflow-hidden pointer-events-none z-50">
-      <div className="flex justify-center items-end h-64 gap-1 md:gap-2">
+    <div className="absolute -bottom-2 left-0 w-full px-4 overflow-hidden pointer-events-none z-50">
+      <div className="flex justify-center items-end h-64 gap-1 md:gap-1.5">
         <AnimatePresence>
           {hand.map((card, i) => {
             // Calculate a nice hand curve - tighter for the new style
             const middle = (hand.length - 1) / 2;
             const offset = i - middle;
             const rotation = offset * 4;
-            const translateY = Math.abs(offset) * 10;
-            const translateX = offset * 15; // Reduced from 20 to prevent overlap on small screens
+            const translateY = Math.abs(offset) * 12;
+            const translateX = offset * 12; // Even more compact to prevent overlap with enemy portrait
             
             return (
               <motion.div 
@@ -48,8 +48,7 @@ export default function Hand() {
         </AnimatePresence>
       </div>
       
-      {/* Hand Counter Info */}
-      <div className="flex justify-center mt-2 pointer-events-none opacity-50 font-black text-[10px] tracking-widest text-slate-500 uppercase px-4 py-1 rounded-full border border-slate-800 bg-slate-900 mx-auto max-w-fit">
+      <div className="flex justify-center mt-2 pointer-events-none opacity-80 font-black text-[10px] tracking-widest text-slate-400 uppercase px-6 py-2 rounded-full border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl mx-auto max-w-fit shadow-2xl">
          {hand.length} / 10 Cards
       </div>
     </div>

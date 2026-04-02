@@ -36,20 +36,20 @@ export default class BattleScene extends Phaser.Scene {
     graphics.fillEllipse(centerX, centerY, width * 0.9, 200);
 
     // Hero Character Sprite
-    this.player = this.add.image(width * 0.25, height * 0.5 + 50, 'hero_avatar');
-    this.player.setDisplaySize(200, 200);
+    this.player = this.add.image(width * 0.3, height * 0.42, 'hero_avatar');
+    this.player.setDisplaySize(180, 180);
     // Add a glow ring around player
     const playerRing = this.add.graphics();
-    playerRing.lineStyle(4, 0x2563eb, 0.5);
-    playerRing.strokeEllipse(this.player.x, this.player.y, 220, 220);
+    playerRing.lineStyle(4, 0x2563eb, 0.3);
+    playerRing.strokeEllipse(this.player.x, this.player.y, 200, 200);
 
     // Enemy Character Sprite
-    this.enemy = this.add.image(width * 0.75, height * 0.5 + 50, 'enemy_avatar');
-    this.enemy.setDisplaySize(250, 250);
+    this.enemy = this.add.image(width * 0.7, height * 0.42, 'enemy_avatar');
+    this.enemy.setDisplaySize(220, 220);
     // Add a glow ring around enemy
     const enemyRing = this.add.graphics();
-    enemyRing.lineStyle(4, 0xef4444, 0.5);
-    enemyRing.strokeEllipse(this.enemy.x, this.enemy.y, 270, 270);
+    enemyRing.lineStyle(4, 0xef4444, 0.3);
+    enemyRing.strokeEllipse(this.enemy.x, this.enemy.y, 240, 240);
 
     // Listen to Zustand store
     this.unsubscribe = useGameStore.subscribe((state, prevState) => {

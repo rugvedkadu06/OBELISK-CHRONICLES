@@ -169,14 +169,13 @@ function App() {
           </motion.div>
         )}
 
-        {/* State: Card List / Gallery - The Soul */}
         {gameState === 'cardList' && (
           <motion.div 
             key="card-gallery"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(40px)' }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[150] bg-slate-950/98 flex flex-col p-8 md:p-16 overflow-hidden"
+            className="absolute inset-0 z-[150] bg-slate-950/70 flex flex-col p-8 md:p-16 overflow-hidden"
           >
              <div className="flex justify-between items-center mb-24 relative px-8">
                 <div className="flex flex-col gap-2">
