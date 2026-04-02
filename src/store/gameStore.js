@@ -51,7 +51,7 @@ export const useGameStore = create((set, get) => ({
   gameResult: null, // 'win' | 'lose' | null
   
   // Timer state
-  timer: 10,
+  timer: 20,
   timerActive: false,
   
   eventQueue: [], 
@@ -95,14 +95,14 @@ export const useGameStore = create((set, get) => ({
       discardPile: [],
       gameState: 'battle',
       turn: 'player', round: 1, gameResult: null, eventQueue: [], isAnimating: false,
-      timer: 10, timerActive: true
+      timer: 20, timerActive: true
     });
     get().setEnemyIntent();
     get().startTimer();
   },
 
   startTimer: () => {
-    set({ timer: 10, timerActive: true });
+    set({ timer: 20, timerActive: true });
   },
 
   tick: () => {
