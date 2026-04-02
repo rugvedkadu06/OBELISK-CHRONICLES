@@ -101,38 +101,26 @@ export default function EnemyHUD() {
          </motion.div>
       </div>
 
-      {/* Middle/Bottom Right: Controls and Combat Log */}
-      <div className="absolute bottom-40 right-4 md:right-10 flex flex-col items-end gap-4 pointer-events-none z-50">
-         <motion.button 
-           initial={{ y: 20, opacity: 0 }}
-           animate={{ y: 0, opacity: 1 }}
-           onClick={endPlayerTurn}
-           disabled={turn !== 'player' || isAnimating || gameResult}
-           className={`group relative overflow-hidden px-8 md:px-12 py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-sm md:text-base transition-all shadow-black/80 shadow-2xl active:scale-95 border-2 flex items-center gap-3 pointer-events-auto ${turn === 'player' && !isAnimating ? 'bg-slate-900 border-red-500 text-white hover:bg-red-500/10 hover:border-red-400 hover:shadow-red-500/20' : 'bg-slate-800 border-slate-700 text-slate-500 opacity-50 cursor-not-allowed'}`}
-         >
-           <SwordsIcon size={20} className={turn === 'player' ? 'text-red-500 group-hover:text-white group-hover:rotate-12 transition-transform' : ''} />
-           {turn === 'player' ? 'Finalize Turn' : 'Awaiting Opponent'}
-           {turn === 'player' && !isAnimating && (
-             <motion.div 
-               animate={{ left: ['-100%', '150%'] }}
-               transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
-               className="absolute top-0 w-20 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"
-             />
-           )}
-         </motion.button>
-
-         <motion.div 
-           initial={{ x: 100, opacity: 0 }}
-           animate={{ x: 0, opacity: 1 }}
-           className="bg-slate-900/60 border border-slate-700/50 p-3 rounded-2xl backdrop-blur-xl min-w-[200px] pointer-events-auto hidden md:block"
-         >
-            <div className="text-[10px] text-slate-500 font-black uppercase tracking-widest pl-1 mb-2">Systems Status</div>
-            <div className="flex justify-between items-center bg-slate-800/40 p-2 rounded-lg border border-white/5">
-               <span className="text-[11px] text-slate-400 font-bold uppercase tracking-widest italic">Victory Sync</span>
-               <span className="text-blue-400 font-black text-xs">{Math.ceil((1 - enemyHP / enemyMaxHP) * 100)}%</span>
-            </div>
-         </motion.div>
-      </div>
+         {/* Controls and Combat Log */}
+         <div className="absolute bottom-40 right-4 md:right-10 flex flex-col items-end gap-4 pointer-events-none z-50">
+            <motion.button 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              onClick={endPlayerTurn}
+              disabled={turn !== 'player' || isAnimating || gameResult}
+              className={`group relative overflow-hidden px-8 md:px-12 py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-sm md:text-base transition-all shadow-black/80 shadow-2xl active:scale-95 border-2 flex items-center gap-3 pointer-events-auto ${turn === 'player' && !isAnimating ? 'bg-slate-900 border-red-500 text-white hover:bg-red-500/10 hover:border-red-400 hover:shadow-red-500/20' : 'bg-slate-800 border-slate-700 text-slate-500 opacity-50 cursor-not-allowed'}`}
+            >
+              <SwordsIcon size={20} className={turn === 'player' ? 'text-red-500 group-hover:text-white group-hover:rotate-12 transition-transform' : ''} />
+              {turn === 'player' ? 'Finalize Turn' : 'Awaiting Opponent'}
+              {turn === 'player' && !isAnimating && (
+                <motion.div 
+                  animate={{ left: ['-100%', '150%'] }}
+                  transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 1 }}
+                  className="absolute top-0 w-20 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"
+                />
+              )}
+            </motion.button>
+         </div>
     </>
   );
 }

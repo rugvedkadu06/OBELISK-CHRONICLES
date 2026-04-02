@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { playSFX } from '../utils/soundManager';
 
 export const INITIAL_DECK = [
   // Attacks
@@ -23,7 +24,8 @@ export const INITIAL_DECK = [
 
 export const useGameStore = create((set, get) => ({
   // Game State
-  gameState: 'start', // 'start' | 'loading' | 'battle' | 'gameover' | 'tutorial' | 'cardList'
+  gameState: 'start', // 'start' | 'battle' | 'gameover' | 'tutorial' | 'cardList'
+  difficulty: 'medium', // 'easy' | 'medium' | 'pro'
   
   // Player Stats
   playerHP: 100,
@@ -48,40 +50,83 @@ export const useGameStore = create((set, get) => ({
   round: 1,
   gameResult: null, // 'win' | 'lose' | null
   
+  // Timer state
+  timer: 10,
+  timerActive: false,
+  
   eventQueue: [], 
   isAnimating: false,
 
+  setDifficulty: (diff) => set({ difficulty: diff }),
   setGameState: (state) => set({ gameState: state }),
 
-  startGame: () => {
-    set({ gameState: 'loading' });
+  startGame: (diff = 'medium') => {
+    playSFX('click');
+    set({ difficulty: diff, gameState: 'loading' });
   },
 
   finishLoading: () => {
     get().initGame();
+    playSFX('turnStart');
     set({ gameState: 'battle' });
   },
 
   initGame: () => {
+    const { difficulty } = get();
+    
+    let playerHP = 100;
+    let enemyHP = 100;
+    let playerMaxEnergy = 3;
+    
+    if (difficulty === 'easy') {
+      enemyHP = 80;
+      playerMaxEnergy = 4;
+    } else if (difficulty === 'pro') {
+      enemyHP = 200;
+    }
+
     const shuffledDeck = [...INITIAL_DECK].sort(() => Math.random() - 0.5);
     set({
-      playerHP: 100, playerMaxHP: 100, playerShield: 0, playerEnergy: 3,
-      enemyHP: 100, enemyMaxHP: 100, enemyShield: 0,
+      playerHP: playerHP, playerMaxHP: playerHP, playerShield: 0, 
+      playerEnergy: playerMaxEnergy, playerMaxEnergy: playerMaxEnergy,
+      enemyHP: enemyHP, enemyMaxHP: enemyHP, enemyShield: 0,
       deck: shuffledDeck.slice(5),
       hand: shuffledDeck.slice(0, 5),
       discardPile: [],
       gameState: 'battle',
-      turn: 'player', round: 1, gameResult: null, eventQueue: [], isAnimating: false
+      turn: 'player', round: 1, gameResult: null, eventQueue: [], isAnimating: false,
+      timer: 10, timerActive: true
     });
     get().setEnemyIntent();
+    get().startTimer();
+  },
+
+  startTimer: () => {
+    set({ timer: 10, timerActive: true });
+  },
+
+  tick: () => {
+    const state = get();
+    if (!state.timerActive || state.gameState !== 'battle' || state.turn !== 'player') return;
+    
+    if (state.timer <= 1) {
+      set({ timer: 0, timerActive: false, gameResult: 'lose', gameState: 'gameover' });
+    } else {
+      set({ timer: state.timer - 1 });
+    }
   },
 
   setEnemyIntent: () => {
+    const { difficulty } = get();
+    let dmgMultiplier = 1;
+    if (difficulty === 'easy') dmgMultiplier = 0.7;
+    if (difficulty === 'pro') dmgMultiplier = 1.5;
+
     const intents = [
-      { type: 'attack', damage: 12 },
-      { type: 'attack', damage: 18 },
+      { type: 'attack', damage: Math.round(12 * dmgMultiplier) },
+      { type: 'attack', damage: Math.round(18 * dmgMultiplier) },
       { type: 'defense', shield: 15 },
-      { type: 'attack_defense', damage: 8, shield: 8 }
+      { type: 'attack_defense', damage: Math.round(8 * dmgMultiplier), shield: 8 }
     ];
     const rand = Math.floor(Math.random() * intents.length);
     set({ enemyIntent: intents[rand] });
@@ -94,12 +139,13 @@ export const useGameStore = create((set, get) => ({
       let newDiscard = [...state.discardPile];
 
       for (let i = 0; i < count; i++) {
+        if (newHand.length >= 5) break; // Limit to 5 cards
         if (newDeck.length === 0) {
           if (newDiscard.length === 0) break;
           newDeck = [...newDiscard].sort(() => Math.random() - 0.5);
           newDiscard = [];
         }
-        if (newHand.length < 10) newHand.push(newDeck.pop());
+        newHand.push(newDeck.pop());
       }
 
       return { deck: newDeck, hand: newHand, discardPile: newDiscard };
@@ -109,8 +155,11 @@ export const useGameStore = create((set, get) => ({
   playCard: (card) => {
     const state = get();
     if (state.turn !== 'player' || state.playerEnergy < card.cost || state.isAnimating || state.gameResult) return;
+    
+    playSFX('playCard');
 
-    set({ playerEnergy: state.playerEnergy - card.cost, isAnimating: true });
+    const newEnergy = state.playerEnergy - card.cost;
+    set({ playerEnergy: newEnergy, isAnimating: true });
     set((state) => ({
       hand: state.hand.filter(c => c.id !== card.id),
       discardPile: [...state.discardPile, card]
@@ -120,10 +169,16 @@ export const useGameStore = create((set, get) => ({
     
     setTimeout(() => {
         if (get().enemyHP <= 0) {
-            set({ gameResult: 'win', turn: 'gameover', gameState: 'gameover' });
+            playSFX('win');
+            set({ gameResult: 'win', turn: 'gameover', gameState: 'gameover', timerActive: false });
         }
         set({ isAnimating: false });
         if (card.draw) get().drawCards(card.draw);
+        
+        // Auto end turn if energy is 0
+        if (get().playerEnergy === 0) {
+           get().endPlayerTurn();
+        }
     }, 600);
   },
 
@@ -184,7 +239,7 @@ export const useGameStore = create((set, get) => ({
 
   endPlayerTurn: () => {
     if (get().turn !== 'player' || get().isAnimating || get().gameResult) return;
-    set({ turn: 'enemy', isAnimating: true, playerShield: 0 });
+    set({ turn: 'enemy', isAnimating: true, playerShield: 0, timerActive: false });
     setTimeout(() => {
         get().executeEnemyTurn();
     }, 1000);
@@ -204,6 +259,7 @@ export const useGameStore = create((set, get) => ({
      
      setTimeout(() => {
          if (get().playerHP <= 0) {
+             playSFX('lose');
              set({ gameResult: 'lose', turn: 'gameover', gameState: 'gameover' });
              return;
          }
@@ -211,6 +267,7 @@ export const useGameStore = create((set, get) => ({
          set({ turn: 'player', round: state.round + 1, playerEnergy: state.playerMaxEnergy, isAnimating: false });
          get().drawCards(3);
          get().setEnemyIntent();
+         get().startTimer();
      }, 1000);
   },
 

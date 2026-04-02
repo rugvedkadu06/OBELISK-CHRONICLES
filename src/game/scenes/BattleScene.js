@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { useGameStore } from '../../store/gameStore';
+import { playSFX } from '../../utils/soundManager';
 
 export default class BattleScene extends Phaser.Scene {
   constructor() {
@@ -35,25 +36,15 @@ export default class BattleScene extends Phaser.Scene {
     const centerY = height / 2 + 150;
     graphics.fillEllipse(centerX, centerY, width * 0.9, 200);
 
-    // Hero Character Sprite
-    this.player = this.add.image(width * 0.3, height * 0.42, 'hero_avatar');
-    this.player.setDisplaySize(180, 180);
-    // Add a glow ring around player
-    const playerRing = this.add.graphics();
-    playerRing.lineStyle(4, 0x2563eb, 0.3);
-    playerRing.strokeEllipse(this.player.x, this.player.y, 200, 200);
-
-    // Enemy Character Sprite
-    this.enemy = this.add.image(width * 0.7, height * 0.42, 'enemy_avatar');
-    this.enemy.setDisplaySize(220, 220);
-    // Add a glow ring around enemy
-    const enemyRing = this.add.graphics();
-    enemyRing.lineStyle(4, 0xef4444, 0.3);
-    enemyRing.strokeEllipse(this.enemy.x, this.enemy.y, 240, 240);
+    // Character Sprites - Positioning will be handled by updateSpritePositions
+    this.player = this.add.image(0, 0, 'hero_avatar');
+    this.enemy = this.add.image(0, 0, 'enemy_avatar');
+    
+    this.updateSpritePositions();
 
     // Listen to Zustand store
     this.unsubscribe = useGameStore.subscribe((state, prevState) => {
-       if (!this.sys || !this.sys.isActive()) return;
+       if (!this.sys || !this.sys.isActive() || !this.scene) return;
 
        if (state.eventQueue.length > prevState.eventQueue.length) {
           const newEvents = state.eventQueue.filter(
@@ -63,13 +54,31 @@ export default class BattleScene extends Phaser.Scene {
        }
     });
 
+    this.scale.on('resize', () => {
+        this.updateSpritePositions();
+    });
+
     // Cleanup on scene shutdown
-    this.events.once('shutdown', () => {
+    this.events.on('shutdown', () => {
         if (this.unsubscribe) {
             this.unsubscribe();
             this.unsubscribe = null;
         }
     });
+  }
+
+  updateSpritePositions() {
+      const { width, height } = this.scale;
+      const isMobile = width < 768;
+
+      if (this.player && this.player.active) {
+          this.player.setPosition(width * (isMobile ? 0.25 : 0.3), height * 0.45);
+          this.player.setDisplaySize(isMobile ? 120 : 180, isMobile ? 120 : 180);
+      }
+      if (this.enemy && this.enemy.active) {
+          this.enemy.setPosition(width * (isMobile ? 0.75 : 0.7), height * 0.45);
+          this.enemy.setDisplaySize(isMobile ? 150 : 220, isMobile ? 150 : 220);
+      }
   }
   
   handleGameEvent(event) {
@@ -98,6 +107,17 @@ export default class BattleScene extends Phaser.Scene {
          const target = event.target === 'player' ? this.player : this.enemy;
          if (!target || !this.add) return;
          
+         // ⚔️ Sword Animation
+         playSFX('attack');
+         const sword = this.add.text(target.x, target.y - 50, '⚔️', { fontSize: '80px' }).setOrigin(0.5);
+         this.tweens.add({
+             targets: sword,
+             scale: { from: 0.5, to: 1.5 },
+             alpha: { from: 1, to: 0 },
+             duration: 600,
+             onComplete: () => sword.destroy()
+         });
+
          // Flash red
          target.setTint(0xff0000);
          this.time.delayedCall(300, () => {
@@ -105,21 +125,14 @@ export default class BattleScene extends Phaser.Scene {
          });
 
          // Floating text
-         const text = this.add.text(target.x, target.y - 150, `-${event.amount}`, {
-             fontFamily: 'Outfit',
-             fontSize: '64px',
-             color: '#ff4444',
-             stroke: '#000000',
-             strokeThickness: 8
+         const text = this.add.text(target.x, target.y - 120, `-${event.amount}`, {
+             fontFamily: 'Outfit', fontSize: '48px', color: '#ff4444',
+             stroke: '#000000', strokeThickness: 4
          }).setOrigin(0.5);
 
          this.tweens.add({
-             targets: text,
-             y: text.y - 120,
-             alpha: 0,
-             duration: 1200,
-             ease: 'Back.out',
-             onComplete: () => text.destroy()
+             targets: text, y: text.y - 100, alpha: 0, duration: 1000,
+             ease: 'Back.out', onComplete: () => text.destroy()
          });
      }
      
@@ -127,34 +140,72 @@ export default class BattleScene extends Phaser.Scene {
          const target = event.target === 'player' ? this.player : this.enemy;
          if (!target || !this.add) return;
 
+         // 🛡️ Shield Animation
+         playSFX('shield');
+         const shield = this.add.text(target.x, target.y - 50, '🛡️', { fontSize: '80px' }).setOrigin(0.5);
+         this.tweens.add({
+             targets: shield,
+             scale: { from: 0.5, to: 1.5 },
+             alpha: { from: 1, to: 0 },
+             duration: 800,
+             onComplete: () => shield.destroy()
+         });
+
          // Flash blue
          target.setTint(0x3b82f6);
          this.time.delayedCall(300, () => {
              if (target && target.active) target.clearTint();
          });
 
-         const text = this.add.text(target.x, target.y - 150, `+${event.amount}`, {
-             fontFamily: 'Outfit',
-             fontSize: '64px',
-             color: '#60a5fa',
-             stroke: '#000000',
-             strokeThickness: 8
+         const text = this.add.text(target.x, target.y - 120, `+${event.amount}`, {
+             fontFamily: 'Outfit', fontSize: '48px', color: '#60a5fa',
+             stroke: '#000000', strokeThickness: 4
          }).setOrigin(0.5);
 
          this.tweens.add({
-             targets: text,
-             y: text.y - 120,
-             alpha: 0,
-             duration: 1200,
-             ease: 'Back.out',
-             onComplete: () => text.destroy()
+             targets: text, y: text.y - 100, alpha: 0, duration: 1000,
+             ease: 'Back.out', onComplete: () => text.destroy()
          });
+     }
+
+     if (event.type === 'heal') {
+        const target = event.target === 'player' ? this.player : this.enemy;
+        if (!target || !this.add) return;
+
+        // ❤️ Heal Animation
+        playSFX('heal');
+        const heart = this.add.text(target.x, target.y - 50, '❤️', { fontSize: '80px' }).setOrigin(0.5);
+        this.tweens.add({
+            targets: heart,
+            y: heart.y - 100,
+            scale: { from: 1, to: 2 },
+            alpha: { from: 1, to: 0 },
+            duration: 1000,
+            onComplete: () => heart.destroy()
+        });
+
+        // Flash green
+        target.setTint(0x22c55e);
+        this.time.delayedCall(300, () => {
+            if (target && target.active) target.clearTint();
+        });
+
+        const text = this.add.text(target.x, target.y - 120, `+${event.amount}`, {
+            fontFamily: 'Outfit', fontSize: '48px', color: '#22c55e',
+            stroke: '#000000', strokeThickness: 4
+         }).setOrigin(0.5);
+
+        this.tweens.add({
+            targets: text, y: text.y - 100, alpha: 0, duration: 1000,
+            ease: 'Back.out', onComplete: () => text.destroy()
+        });
      }
   }
 
   destroy() {
       if (this.unsubscribe) {
           this.unsubscribe();
+          this.unsubscribe = null;
       }
       super.destroy();
   }

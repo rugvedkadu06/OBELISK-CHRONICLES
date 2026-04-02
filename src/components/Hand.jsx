@@ -48,8 +48,8 @@ export default function Hand() {
         </AnimatePresence>
       </div>
       
-      <div className="flex justify-center mt-2 pointer-events-none opacity-80 font-black text-[10px] tracking-widest text-slate-400 uppercase px-6 py-2 rounded-full border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl mx-auto max-w-fit shadow-2xl">
-         {hand.length} / 10 Cards
+      <div className="flex justify-center mt-2 pointer-events-none opacity-80 font-black text-[8px] md:text-[10px] tracking-widest text-slate-400 uppercase px-4 md:px-6 py-2 rounded-full border border-slate-700/50 bg-slate-900/60 backdrop-blur-xl mx-auto max-w-fit shadow-2xl">
+         {hand.length} / 5 Cards
       </div>
     </div>
   );
