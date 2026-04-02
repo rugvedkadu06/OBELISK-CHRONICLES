@@ -8,7 +8,7 @@ export default function Hand() {
 
   return (
     <div className="absolute -bottom-2 left-0 w-full px-4 overflow-hidden pointer-events-none z-50">
-      <div className="flex justify-center items-end h-64 gap-1 md:gap-1.5">
+      <div id="player-hand" className="flex justify-center items-end h-64 gap-1 md:gap-1.5">
         <AnimatePresence>
           {hand.map((card, i) => {
             // Calculate a nice hand curve - tighter for the new style

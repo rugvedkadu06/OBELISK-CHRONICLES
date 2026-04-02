@@ -42,6 +42,8 @@ export const useGameStore = create(
       // Game State
       gameState: 'start', // 'start' | 'battle' | 'gameover' | 'tutorial' | 'cardList' | 'history'
       difficulty: 'medium',
+      isTutorial: false,
+      tutorialStep: 0,
       
       // Player Stats
       playerHP: 100,
@@ -112,6 +114,10 @@ export const useGameStore = create(
           playerMaxEnergy = 4;
         } else if (difficulty === 'pro') {
           enemyHP = 200;
+        } else if (difficulty === 'tutorial') {
+          playerHP = 150;
+          enemyHP = 50;
+          playerMaxEnergy = 3;
         }
 
         let fullDeck = [...INITIAL_DECK];
@@ -128,8 +134,11 @@ export const useGameStore = create(
           hand: shuffledDeck.slice(0, 5),
           discardPile: [],
           gameState: 'battle',
+          isTutorial: difficulty === 'tutorial',
+          tutorialStep: difficulty === 'tutorial' ? 1 : 0,
           turn: 'player', round: 1, gameResult: null, eventQueue: [], isAnimating: false,
-          timer: 20, timerActive: true
+          timer: difficulty === 'tutorial' ? 99 : 20, 
+          timerActive: difficulty !== 'tutorial'
         });
         get().setEnemyIntent();
         get().startTimer();
@@ -216,7 +225,7 @@ export const useGameStore = create(
             set({ isAnimating: false });
             if (card.draw) get().drawCards(card.draw);
             
-            if (get().playerEnergy === 0) {
+            if (get().playerEnergy === 0 && !get().isTutorial) {
               get().endPlayerTurn();
             }
         }, 600);
@@ -316,6 +325,14 @@ export const useGameStore = create(
           set((state) => ({
               eventQueue: state.eventQueue.filter(e => e.id !== eventId)
           }));
+      },
+
+      nextTutorialStep: () => {
+          set((state) => ({ tutorialStep: state.tutorialStep + 1 }));
+      },
+
+      resetTutorial: () => {
+          set({ tutorialStep: 0, isTutorial: false });
       }
     }),
     {

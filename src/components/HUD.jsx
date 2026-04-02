@@ -4,7 +4,7 @@ import { Heart, Shield, Zap, User, Trophy, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HUD() {
-  const { playerHP, playerMaxHP, playerShield, playerEnergy, playerMaxEnergy, turn, round, timer, gameResult } = useGameStore();
+  const { playerHP, playerMaxHP, playerShield, playerEnergy, playerMaxEnergy, turn, round, timer, gameResult, isTutorial } = useGameStore();
 
   return (
     <div className="absolute inset-0 pointer-events-none z-50 flex flex-col p-4 md:p-6 overflow-hidden">
@@ -19,7 +19,7 @@ export default function HUD() {
            className="flex flex-col gap-3 pointer-events-auto scale-90 md:scale-100 origin-top-left"
          >
            {/* Avatar and Health Card */}
-           <div className="bg-slate-900/80 border-2 border-slate-700/50 p-3 md:p-4 rounded-3xl shadow-2xl backdrop-blur-xl min-w-[240px] md:min-w-[280px] relative group overflow-hidden">
+           <div id="player-hud" className="bg-slate-900/80 border-2 border-slate-700/50 p-3 md:p-4 rounded-3xl shadow-2xl backdrop-blur-xl min-w-[240px] md:min-w-[280px] relative group overflow-hidden">
              <div className="flex items-center gap-3 md:gap-4 mb-3 md:mb-4">
                 <div className="relative">
                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl border-2 border-blue-500 overflow-hidden shadow-[0_0_20px_rgba(37,99,235,0.4)]">
@@ -111,7 +111,7 @@ export default function HUD() {
             </motion.div>
 
             <AnimatePresence>
-              {turn === 'player' && !gameResult && (
+              {turn === 'player' && !gameResult && !isTutorial && (
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}

@@ -26,6 +26,7 @@ export default function EnemyHUD() {
       {/* Top Right: Enemy Profile and HP */}
       <div className="absolute top-4 right-4 md:top-6 md:right-6 flex flex-col items-end gap-3 pointer-events-none z-50">
          <motion.div 
+           id="enemy-hud"
            initial={{ x: 100, opacity: 0 }}
            animate={{ x: 0, opacity: 1 }}
            className="bg-slate-900/80 border-2 border-red-500/30 p-4 rounded-3xl shadow-2xl backdrop-blur-xl min-w-[280px] max-w-[90vw] pointer-events-auto group"
@@ -104,6 +105,7 @@ export default function EnemyHUD() {
          {/* Controls and Combat Log */}
          <div className="absolute bottom-40 right-4 md:right-10 flex flex-col items-end gap-4 pointer-events-none z-50">
             <motion.button 
+              id="end-turn-button"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               onClick={endPlayerTurn}
