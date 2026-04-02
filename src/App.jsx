@@ -5,13 +5,13 @@ import EnemyHUD from './components/EnemyHUD';
 import Hand from './components/Hand';
 import Card from './components/Card';
 import GalleryCard from './components/GalleryCard';
-import { useGameStore, INITIAL_DECK } from './store/gameStore';
+import { useGameStore, INITIAL_DECK, LEGENDARY_CARD } from './store/gameStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, RefreshCcw, Skull, Play, Disc, BookOpen, LayoutGrid, X, ArrowLeft, Shield, Zap, Swords, ChevronRight, Activity, Flame, Sparkles } from 'lucide-react';
 import { playSFX } from './utils/soundManager';
 
 function App() {
-  const { gameState, gameResult, startGame, finishLoading, setGameState, difficulty, setDifficulty, tick } = useGameStore();
+  const { gameState, gameResult, startGame, finishLoading, setGameState, difficulty, setDifficulty, tick, matchHistory } = useGameStore();
 
   useEffect(() => {
     let interval;
@@ -79,12 +79,22 @@ function App() {
                    <p className="font-['Cinzel'] text-amber-100/50 font-black tracking-[0.4em] md:tracking-[0.8em] uppercase text-[8px] md:text-[10px] mt-4 md:mt-8 bg-black/40 px-6 py-2 border border-white/5 rounded-full inline-block">Omnicron Alpha Directive_v1.0</p>
                 </div>
 
-                <div className="flex flex-col gap-4 w-full max-w-md items-center mt-4">
+             <div className="flex flex-col gap-4 w-full max-w-md items-center mt-4">
+                  <div className="flex flex-col items-center mb-2">
+                    <div className="flex items-center gap-2 text-amber-500 font-['Cinzel'] text-xs font-black uppercase tracking-widest bg-amber-950/20 px-4 py-1 rounded-full border border-amber-500/20">
+                      <Trophy size={14} />
+                      <span>{matchHistory.filter(m => m.result === 'win').length} Victories</span>
+                    </div>
+                    {matchHistory.filter(m => m.result === 'win').length >= 5 && (
+                      <div className="text-[10px] text-amber-200/50 mt-1 uppercase tracking-[0.2em] font-black italic">Legendary Soul Unlocked</div>
+                    )}
+                  </div>
+
                   <div className="flex gap-2 w-full">
                     {['easy', 'medium', 'pro'].map((level) => (
                       <button
                         key={level}
-                        onClick={() => setDifficulty(level)}
+                        onClick={() => { playSFX('click'); setDifficulty(level); }}
                         className={`flex-1 py-3 rounded-lg font-['Cinzel'] font-black uppercase tracking-widest text-[10px] transition-all border-2 ${
                           difficulty === level 
                             ? 'bg-amber-600 border-amber-400 text-white shadow-[0_0_15px_rgba(217,119,6,0.5)]' 
@@ -105,20 +115,20 @@ function App() {
                      <div className="absolute inset-0 border-2 border-amber-600/30 rounded-xl group-hover:border-amber-400 transition-all duration-300" />
                      <div className="absolute -inset-1 border border-amber-500/10 rounded-xl animate-pulse" />
                      <span className="font-['Cinzel'] text-xl md:text-3xl font-black uppercase tracking-[0.2em] text-amber-100 group-hover:text-white group-hover:drop-shadow-[0_0_15px_#fff] transition-all">Begin Fate</span>
-                     <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-amber-500" />
-                     <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-amber-500" />
-                     <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-amber-500" />
-                     <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-amber-500" />
                    </motion.button>
                    
-                   <div className="flex gap-4 w-full">
-                       <button onClick={() => { playSFX('click'); setGameState('tutorial'); }} className="group flex-1 flex items-center justify-center gap-3 px-4 py-4 bg-transparent hover:bg-white/5 border border-white/10 hover:border-amber-500 transition-all rounded-xl backdrop-blur-sm">
-                         <BookOpen size={14} className="group-hover:text-amber-500" />
-                         <span className="font-['Cinzel'] text-[12px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-amber-100">The Tome</span>
+                   <div className="grid grid-cols-3 gap-4 w-full">
+                       <button onClick={() => { playSFX('click'); setGameState('tutorial'); }} className="group flex flex-col items-center justify-center gap-2 py-4 bg-transparent hover:bg-white/5 border border-white/10 hover:border-amber-500 transition-all rounded-xl backdrop-blur-sm">
+                         <BookOpen size={16} className="group-hover:text-amber-500" />
+                         <span className="font-['Cinzel'] text-[8px] font-black uppercase tracking-[0.1em] text-slate-400 group-hover:text-amber-100 text-center">Tome</span>
                        </button>
-                       <button onClick={() => { playSFX('click'); setGameState('cardList'); }} className="group flex-1 flex items-center justify-center gap-3 px-4 py-4 bg-transparent hover:bg-white/5 border border-white/10 hover:border-amber-500 transition-all rounded-xl backdrop-blur-sm">
-                         <LayoutGrid size={14} className="group-hover:text-amber-500" />
-                         <span className="font-['Cinzel'] text-[12px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-amber-100">The Soul</span>
+                       <button onClick={() => { playSFX('click'); setGameState('cardList'); }} className="group flex flex-col items-center justify-center gap-2 py-4 bg-transparent hover:bg-white/5 border border-white/10 hover:border-amber-500 transition-all rounded-xl backdrop-blur-sm">
+                         <LayoutGrid size={16} className="group-hover:text-amber-500" />
+                         <span className="font-['Cinzel'] text-[8px] font-black uppercase tracking-[0.1em] text-slate-400 group-hover:text-amber-100 text-center">Souls</span>
+                       </button>
+                       <button onClick={() => { playSFX('click'); setGameState('history'); }} className="group flex flex-col items-center justify-center gap-2 py-4 bg-transparent hover:bg-white/5 border border-white/10 hover:border-amber-500 transition-all rounded-xl backdrop-blur-sm">
+                         <Activity size={16} className="group-hover:text-amber-500" />
+                         <span className="font-['Cinzel'] text-[8px] font-black uppercase tracking-[0.1em] text-slate-400 group-hover:text-amber-100 text-center">Chronos</span>
                        </button>
                    </div>
                 </div>
@@ -198,9 +208,12 @@ function App() {
              </div>
              <div className="flex-1 overflow-y-auto px-4 scrollbar-hide pb-20">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-12 justify-items-center">
-                   {INITIAL_DECK.map((card, idx) => (
+                   {[...INITIAL_DECK, LEGENDARY_CARD].map((card, idx) => (
                       <div key={idx} className="flex flex-col items-center gap-4">
-                         <GalleryCard card={card} />
+                         <GalleryCard 
+                            card={card} 
+                            locked={card.id === 'legendary_void' && matchHistory.filter(m => m.result === 'win').length < 5} 
+                         />
                       </div>
                    ))}
                 </div>
@@ -208,7 +221,60 @@ function App() {
           </motion.div>
         )}
 
-        {/* State: Battle Scene */}
+        {/* State: History / Hall of Records */}
+        {gameState === 'history' && (
+          <motion.div 
+            key="history-screen"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[150] bg-slate-950/90 flex flex-col p-6 overflow-hidden backdrop-blur-md"
+          >
+             <div className="flex justify-between items-center mb-12 relative px-4">
+                <h2 className="font-['Cinzel'] text-4xl md:text-8xl font-black italic uppercase text-white opacity-90">The <span className="text-amber-500">Chronos</span></h2>
+                <button onClick={() => { playSFX('click'); setGameState('start'); }} className="p-4 bg-slate-900 border-2 border-amber-900 rounded-full text-amber-500">
+                   <X size={24} />
+                </button>
+             </div>
+             
+             <div className="flex-1 overflow-y-auto px-4 scrollbar-hide pb-20 max-w-5xl mx-auto w-full">
+                {matchHistory.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-slate-500 italic opacity-50 font-['Cinzel'] tracking-widest">
+                       No echoes found in the chronos...
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                       {matchHistory.map((record) => (
+                          <motion.div 
+                             key={record.id}
+                             initial={{ x: -20, opacity: 0 }}
+                             animate={{ x: 0, opacity: 1 }}
+                             className={`flex items-center justify-between p-6 rounded-2xl border-l-4 bg-white/5 border-white/5 ${record.result === 'win' ? 'border-l-amber-500' : 'border-l-red-500'}`}
+                          >
+                             <div className="flex items-center gap-6">
+                                <div className={`p-4 rounded-full ${record.result === 'win' ? 'bg-amber-950/30 text-amber-500' : 'bg-red-950/30 text-red-500'}`}>
+                                   {record.result === 'win' ? <Trophy size={24} /> : <Skull size={24} />}
+                                </div>
+                                <div>
+                                   <div className={`font-['Cinzel'] font-black uppercase text-xl ${record.result === 'win' ? 'text-amber-100' : 'text-red-100'}`}>
+                                      {record.result === 'win' ? 'Ascended' : 'Discarded'}
+                                   </div>
+                                   <div className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">
+                                      {record.timestamp} • {record.difficulty} Mode
+                                   </div>
+                                </div>
+                             </div>
+                             <div className="text-right">
+                                <div className="font-['Cinzel'] text-amber-500 font-black text-2xl">{record.rounds}</div>
+                                <div className="text-[8px] text-slate-600 uppercase tracking-widest">Rounds</div>
+                             </div>
+                          </motion.div>
+                       ))}
+                    </div>
+                )}
+             </div>
+          </motion.div>
+        )}
         {(gameState === 'battle' || gameState === 'gameover') && (
           <motion.div key="battle-arena" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full relative">
             <GameCanvas />
